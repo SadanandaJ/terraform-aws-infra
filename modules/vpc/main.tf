@@ -31,9 +31,9 @@ resource "aws_internet_gateway" "igw" {
 }
 # Elastic IPs for NAT Gateways
 resource "aws_eip" "nat" {
+  count  = length(var.public_subnet_cidrs)
   domain = "vpc"
 }
-
 # NAT Gateways in public subnets
 resource "aws_nat_gateway" "this" {
   count         = length(aws_subnet.public)
