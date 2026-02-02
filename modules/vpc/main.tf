@@ -34,8 +34,6 @@ resource "aws_eip" "nat" {
   domain = "vpc"
 }
 
-}
-
 # NAT Gateways in public subnets
 resource "aws_nat_gateway" "this" {
   count         = length(aws_subnet.public)
