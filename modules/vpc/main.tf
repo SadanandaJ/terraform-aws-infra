@@ -29,6 +29,39 @@ resource "aws_subnet" "private" {
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.this.id
 }
+# Elastic IPs for NAT Gateways
+resource "aws_eip" "nat" {
+  count = length(aws_subnet.public)
+  vpc   = true
+}
+
+# NAT Gateways in public subnets
+resource "aws_nat_gateway" "this" {
+  count         = length(aws_subnet.public)
+  allocation_id = aws_eip.nat[count.index].id
+  subnet_id     = aws_subnet.public[count.index].id
+}
+
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.this.id
+  count  = length(aws_subnet.private)
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.this[count.index % length(aws_nat_gateway.this)].id
+  }
+
+  tags = {
+    Name = "${var.name}-private-rt-${count.index}"
+  }
+}
+
+# Associate private subnets
+resource "aws_route_table_association" "private" {
+  count          = length(aws_subnet.private)
+  subnet_id      = aws_subnet.private[count.index].id
+  route_table_id = aws_route_table.private[count.index].id
+}
 
 # Optional: public route table (common practice)
 resource "aws_route_table" "public" {
