@@ -1,4 +1,4 @@
-ami_id        = "ami-0abcdef1234567890"
+ami_id        = "ami-0fb0b230890ccd1e6"
 instance_type = "t2.micro"
 key_name      = "my-key"
 min           = 1
